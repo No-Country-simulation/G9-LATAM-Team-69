@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: api-energy-model-test
+onnx:
+  model:
+    path: classpath:model/model.onnx
