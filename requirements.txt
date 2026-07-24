@@ -1,0 +1,21 @@
+# Análisis Inteligente del Consumo Energético — Hackathon ONE G9
+# Instalación:  pip install -r requirements.txt
+
+# --- Análisis y modelado ---
+pandas>=2.0
+numpy>=1.24
+scikit-learn>=1.3
+joblib>=1.3
+
+# --- Visualización ---
+matplotlib>=3.7
+seaborn>=0.13
+
+# --- Exportación e inferencia ONNX (entrega para Back-End) ---
+skl2onnx>=1.16
+onnx>=1.15
+onnxruntime>=1.16
+
+# --- Entorno de notebooks ---
+jupyter>=1.0
+ipykernel>=6.25
