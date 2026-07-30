@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: apre_Auth_bucket_g9
+onnx:
+  model:
+    path: classpath:model/model.onnx

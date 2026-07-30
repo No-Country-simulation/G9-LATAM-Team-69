@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="CSS/main.css">
+
+    <title>Inicio</title>
+</head>
+
+<body>
+<main class="Inicio" id="vista-inicio">
+    <section class="Info">
+        <div class="Logo">
+            <h1>Energi<span>AI</span></h1>
+            <img src="Imagenes/HojaLogo.png" alt="Logo App">
+        </div>
+        <p>
+        Ingresa la información de tu hogar y descubre cómo se<br>
+        compara tu consumo con el esperado, junto con<br>
+        recomendaciones para optimizar tu eficiencia<br>
+        energética.
+        </p>
+        <button id="btnComenzar">Comenzar análisis</button>
+    </section>
+
+    <img src="Imagenes/ImgInicio.png" alt="Imagen de inicio">
+</main>
+
+<main class="Formulario" id="vista-formulario" hidden>
+    <form id="formAnalisis">
+        <h2>Contanos sobre tu hogar</h2>
+
+        <div class="campo">
+            <label for="consumo_kwh">Consumo mensual (kWh)</label>
+            <input type="number" id="consumo_kwh" name="consumo_kwh" step="0.01" min="0" required>
+        </div>
+
+        <div class="campo">
+            <label for="personas">Cantidad de personas</label>
+            <input type="number" id="personas" name="personas" step="1" min="1" required>
+        </div>
+
+        <div class="campo">
+            <label for="superficie_m2">Superficie (m²)</label>
+            <input type="number" id="superficie_m2" name="superficie_m2" step="0.01" min="0" required>
+        </div>
+
+        <div class="campo">
+            <label for="cantidad_equipos">Cantidad de equipos eléctricos</label>
+            <input type="number" id="cantidad_equipos" name="cantidad_equipos" step="1" min="0" required>
+        </div>
+
+        <div class="campo">
+            <label for="tipo_inmueble">Tipo de inmueble</label>
+            <select id="tipo_inmueble" name="tipo_inmueble" required>
+                <option value="Casa">Casa</option>
+                <option value="Departamento">Departamento</option>
+            </select>
+        </div>
+
+        <div class="campo">
+            <label for="horas_alto_consumo">Horas de alto consumo por día</label>
+            <input type="number" id="horas_alto_consumo" name="horas_alto_consumo" step="1" min="0" max="24" required>
+        </div>
+
+        <label class="checkbox">
+            <input type="checkbox" id="uso_horario_pico" name="uso_horario_pico">
+            Uso frecuente en horario pico
+        </label>
+
+        <label class="checkbox">
+            <input type="checkbox" id="panel_solar" name="panel_solar">
+            Tengo panel solar
+        </label>
+
+        <p class="error" id="errorMsg"></p>
+
+        <button type="submit">Calcular</button>
+    </form>
+</main>
+
+<main class="Resultado" id="vista-resultado" hidden>
+    <h2>Resultado de tu análisis</h2>
+    <div class="Tarjeta">
+        <p class="etiqueta">Categoría</p>
+        <p class="valor" id="resCategoria">-</p>
+        <p class="subvalor" id="resProbabilidad"></p>
+    </div>
+    <div class="Tarjeta">
+        <p class="etiqueta">Costo estimado mensual</p>
+        <p class="valor" id="resCosto">-</p>
+    </div>
+    <div class="Tarjeta">
+        <p class="etiqueta">Recomendaciones</p>
+        <ul id="resRecomendaciones"></ul>
+    </div>
+    <button id="btnVolver">Volver al formulario</button>
+</main>
+
+<footer></footer>
+
+<script src="JS/main.js" defer></script>
+</body>
+</html>

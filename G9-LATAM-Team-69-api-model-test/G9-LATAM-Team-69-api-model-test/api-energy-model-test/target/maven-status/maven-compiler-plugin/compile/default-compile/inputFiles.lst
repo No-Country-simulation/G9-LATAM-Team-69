@@ -1,0 +1,6 @@
+C:\Users\User\Downloads\hackaton\G9-LATAM-Team-69-api-model-test\G9-LATAM-Team-69-api-model-test\api-energy-model-test\src\main\java\com\bag\api_energy_model_test\ApiEnergyModelTestApplication.java
+C:\Users\User\Downloads\hackaton\G9-LATAM-Team-69-api-model-test\G9-LATAM-Team-69-api-model-test\api-energy-model-test\src\main\java\com\bag\api_energy_model_test\config\WebConfig.java
+C:\Users\User\Downloads\hackaton\G9-LATAM-Team-69-api-model-test\G9-LATAM-Team-69-api-model-test\api-energy-model-test\src\main\java\com\bag\api_energy_model_test\controller\OnnxModelController.java
+C:\Users\User\Downloads\hackaton\G9-LATAM-Team-69-api-model-test\G9-LATAM-Team-69-api-model-test\api-energy-model-test\src\main\java\com\bag\api_energy_model_test\dto\PredictionRequest.java
+C:\Users\User\Downloads\hackaton\G9-LATAM-Team-69-api-model-test\G9-LATAM-Team-69-api-model-test\api-energy-model-test\src\main\java\com\bag\api_energy_model_test\dto\PredictionResponse.java
+C:\Users\User\Downloads\hackaton\G9-LATAM-Team-69-api-model-test\G9-LATAM-Team-69-api-model-test\api-energy-model-test\src\main\java\com\bag\api_energy_model_test\service\OnnxModelService.java

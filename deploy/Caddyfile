@@ -1,0 +1,10 @@
+# Caddyfile — proxy inverso con HTTPS automático para la API.
+# Reemplaza <IP_PUBLICA> por la IP pública de tu VM de OCI (ej. 140.238.1.23).
+# nip.io convierte esa IP en un dominio real (140.238.1.23.nip.io), que es lo que
+# Caddy necesita para pedir un certificado gratis a Let's Encrypt automáticamente.
+#
+# Requisitos: puertos 80 y 443 abiertos (Security List de OCI + firewall del sistema).
+
+<IP_PUBLICA>.nip.io {
+    reverse_proxy localhost:8080
+}

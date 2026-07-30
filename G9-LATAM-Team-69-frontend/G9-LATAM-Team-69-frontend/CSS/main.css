@@ -1,0 +1,157 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+body{
+    background: #F1FBF3;
+    font-family:Arial, Helvetica, sans-serif;
+    display: flex;
+    flex-direction: column;
+}
+.Inicio{
+    width: 90%;
+    max-width: 1500PX;
+    min-height: calc(100vh - 60px);
+    margin: auto;
+    margin-left: 10%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:150px;
+    flex: 1;
+
+}
+.info{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:25px;
+    flex:1;
+}
+.Logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+.Logo img{
+    width: 150px;
+    height:auto;
+    filter: hue-rotate(0deg);
+}
+.Logo h1{
+    font-size: 8rem;
+    color: #233243;
+}
+span{
+    color:#5EAC6C;
+}
+.Info p{
+    font-size: 1.7rem;
+    line-height: 1.7;
+    max-width: 100%;
+    margin-bottom: 35px;
+    margin-top: 20px;
+    color:#58656F;
+}
+button{
+    padding: 30px 90px;
+    background-color: #5AA469;
+    color: aliceblue;
+    border-color:seagreen;
+    border-radius: 40px;
+    cursor:pointer;
+    font-size: 30px;
+    margin-top: 20px;
+}
+button:hover{
+    background:#4C8E58;
+    color: #233243;
+}
+footer{
+    width: 100%;
+    height: 60px;
+    background:#5AA469;
+}
+
+.Formulario, .Resultado{
+    width: 90%;
+    max-width: 600px;
+    min-height: calc(100vh - 60px);
+    margin: auto;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:15px;
+}
+.Formulario h2, .Resultado h2{
+    color:#233243;
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+.Formulario label{
+    color:#58656F;
+    font-size: 1rem;
+    font-weight:bold;
+}
+.Formulario label.checkbox{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-weight:normal;
+}
+#formAnalisis{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+}
+.campo{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+.Formulario input[type="number"],
+.Formulario select{
+    width:100%;
+    padding: 12px 15px;
+    border: 1px solid #C9D6CD;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-family: inherit;
+    background:#fff;
+}
+.Formulario input[type="checkbox"]{
+    width: 18px;
+    height: 18px;
+}
+.Formulario button, .Resultado button{
+    align-self:flex-start;
+    padding: 15px 45px;
+    font-size: 1.2rem;
+    margin-top: 10px;
+}
+.error{
+    color:#C0392B;
+    font-size:0.95rem;
+    min-height: 1.2em;
+}
+.Resultado .Tarjeta{
+    background:#fff;
+    border-radius: 15px;
+    padding: 20px 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.Resultado .etiqueta{
+    color:#58656F;
+    font-size: 1rem;
+    margin-bottom: 5px;
+}
+.Resultado .valor{
+    color:#233243;
+    font-size: 2rem;
+    font-weight:bold;
+}
+
+[hidden]{
+    display:none !important;
+}

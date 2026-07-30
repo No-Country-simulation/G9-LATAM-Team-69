@@ -1,0 +1,15 @@
+[Unit]
+Description=API Energia G9 (Spring Boot)
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu
+# El .jar que subes por scp. Ajusta el nombre si tu build genera otro.
+ExecStart=/usr/bin/java -jar /home/ubuntu/api-energy-model-test.jar
+SuccessExitStatus=143
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

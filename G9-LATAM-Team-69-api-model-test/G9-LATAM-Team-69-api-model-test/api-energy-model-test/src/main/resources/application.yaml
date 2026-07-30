@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: pre_Auth_bucket_g9
+onnx:
+  model:
+    # Modelo alojado en OCI Object Storage (Pre-Authenticated Request, solo lectura).
+    # Reemplaza la URL por la PAR que copiaste. Spring la resuelve como recurso remoto (UrlResource).
+    # Para volver al modelo local, usa: classpath:model/model.onnx
+    path: https://objectstorage.sa-santiago-1.oraclecloud.com/p/yk9FwP4djUHe314oie9W_-J2_UB8NJJUV7sWNOJnRepGp0MocvOT6OiT0WCkdYQW/n/axexzonjzvlk/b/Nova-enegia/o/Nova-onnxmodel.onnx

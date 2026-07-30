@@ -1,0 +1,6 @@
+com\bag\api_energy_model_test\service\OnnxModelService.class
+com\bag\api_energy_model_test\controller\OnnxModelController.class
+com\bag\api_energy_model_test\dto\PredictionRequest.class
+com\bag\api_energy_model_test\ApiEnergyModelTestApplication.class
+com\bag\api_energy_model_test\dto\PredictionResponse.class
+com\bag\api_energy_model_test\dto\PredictionResponse$PredictionResponseBuilder.class
