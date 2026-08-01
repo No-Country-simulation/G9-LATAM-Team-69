@@ -4,102 +4,202 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="CSS/main.css">
-
-    <title>Inicio</title>
+    <title>EnergiAI — Análisis de eficiencia energética</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 </head>
-
 <body>
-<main class="Inicio" id="vista-inicio">
-    <section class="Info">
-        <div class="Logo">
-            <h1>Energi<span>AI</span></h1>
-            <img src="Imagenes/HojaLogo.png" alt="Logo App">
+
+<header class="topbar">
+    <div class="brand">
+        <img src="Imagenes/HojaLogo.png" alt="EnergiAI" onerror="this.style.display='none'">
+        <span>Energi<b>AI</b></span>
+    </div>
+</header>
+
+<!-- ============ INICIO ============ -->
+<main class="vista inicio" id="vista-inicio">
+    <section class="hero">
+        <div class="hero-text">
+            <h1>Entiende y mejora tu <span>consumo eléctrico</span></h1>
+            <p class="lead">
+                Ingresa unos datos de tu hogar y descubre tu perfil de eficiencia, cuánto pagas,
+                qué está de más y cómo ahorrar — con recomendaciones y un simulador de ahorro.
+            </p>
+            <button class="btn-primary" id="btnComenzar">Comenzar análisis →</button>
         </div>
-        <p>
-        Ingresa la información de tu hogar y descubre cómo se<br>
-        compara tu consumo con el esperado, junto con<br>
-        recomendaciones para optimizar tu eficiencia<br>
-        energética.
-        </p>
-        <button id="btnComenzar">Comenzar análisis</button>
+        <img class="hero-img" src="Imagenes/ImgInicio.png" alt="" onerror="this.style.display='none'">
     </section>
 
-    <img src="Imagenes/ImgInicio.png" alt="Imagen de inicio">
+    <section class="pasos">
+        <h2>¿Cómo funciona?</h2>
+        <div class="pasos-grid">
+            <div class="paso"><div class="paso-num">1</div><h3>Ingresa tus datos</h3><p>Consumo, tamaño del hogar y hábitos. Toma menos de un minuto.</p></div>
+            <div class="paso"><div class="paso-num">2</div><h3>Analizamos tu perfil</h3><p>Un modelo compara tu consumo con el esperado para tu vivienda.</p></div>
+            <div class="paso"><div class="paso-num">3</div><h3>Recibe tu plan</h3><p>Categoría, costo, recomendaciones y un simulador de ahorro.</p></div>
+        </div>
+    </section>
 </main>
 
-<main class="Formulario" id="vista-formulario" hidden>
-    <form id="formAnalisis">
-        <h2>Contanos sobre tu hogar</h2>
+<!-- ============ FORMULARIO ============ -->
+<main class="vista formulario" id="vista-formulario" hidden>
+    <h2>Cuéntanos sobre tu hogar</h2>
+    <p class="subtitulo">Todos los campos son necesarios para un análisis preciso.</p>
 
-        <div class="campo">
-            <label for="consumo_kwh">Consumo mensual (kWh)</label>
-            <input type="number" id="consumo_kwh" name="consumo_kwh" step="0.01" min="0" required>
+    <form id="formAnalisis" class="tarjeta">
+        <div class="grid-campos">
+            <div class="campo">
+                <label for="consumo_kwh">Consumo mensual (kWh)</label>
+                <input type="number" id="consumo_kwh" name="consumo_kwh" step="0.01" min="0" required placeholder="Ej. 350">
+                <small>Lo encuentras en tu factura eléctrica del mes.</small>
+            </div>
+            <div class="campo">
+                <label for="personas">Cantidad de personas</label>
+                <input type="number" id="personas" name="personas" step="1" min="1" required placeholder="Ej. 4">
+                <small>Personas que viven habitualmente en el hogar.</small>
+            </div>
+            <div class="campo">
+                <label for="superficie_m2">Superficie (m²)</label>
+                <input type="number" id="superficie_m2" name="superficie_m2" step="0.01" min="0" required placeholder="Ej. 90">
+                <small>Metros cuadrados construidos de la vivienda.</small>
+            </div>
+            <div class="campo">
+                <label for="cantidad_equipos">Equipos eléctricos</label>
+                <input type="number" id="cantidad_equipos" name="cantidad_equipos" step="1" min="0" required placeholder="Ej. 8">
+                <small>Electrodomésticos y dispositivos principales.</small>
+            </div>
+            <div class="campo">
+                <label for="tipo_inmueble">Tipo de inmueble</label>
+                <select id="tipo_inmueble" name="tipo_inmueble" required>
+                    <option value="Casa">Casa</option>
+                    <option value="Departamento">Departamento</option>
+                </select>
+                <small>Casas suelen consumir más que departamentos.</small>
+            </div>
+            <div class="campo">
+                <label for="horas_alto_consumo">Horas de alto consumo al día</label>
+                <input type="number" id="horas_alto_consumo" name="horas_alto_consumo" step="1" min="0" max="24" required placeholder="Ej. 6">
+                <small>Horas en que usas varios equipos a la vez.</small>
+            </div>
         </div>
 
-        <div class="campo">
-            <label for="personas">Cantidad de personas</label>
-            <input type="number" id="personas" name="personas" step="1" min="1" required>
+        <div class="campo-check">
+            <label class="switch">
+                <input type="checkbox" id="uso_horario_pico" name="uso_horario_pico">
+                <span class="slider-sw"></span>
+            </label>
+            <div>
+                <strong>Uso frecuente en horario punta</strong>
+                <button type="button" class="info-toggle" id="infoPicoBtn">¿Qué es esto? ⌄</button>
+            </div>
+        </div>
+        <div class="info-box" id="infoPico" hidden>
+            El <b>horario punta</b> son las franjas de mayor demanda eléctrica del día (normalmente al
+            final de la tarde y la noche). Concentrar tu consumo ahí <b>sobrecarga la red</b> y, con
+            tarifas horarias, <b>encarece la factura</b>. Redistribuir tareas pesadas (lavadora, plancha,
+            calefacción) hacia horas valle y reducir el consumo total mejora tu eficiencia.
         </div>
 
-        <div class="campo">
-            <label for="superficie_m2">Superficie (m²)</label>
-            <input type="number" id="superficie_m2" name="superficie_m2" step="0.01" min="0" required>
+        <div class="campo-check">
+            <label class="switch">
+                <input type="checkbox" id="panel_solar" name="panel_solar">
+                <span class="slider-sw"></span>
+            </label>
+            <div><strong>Tengo panel solar</strong><small>Reduce el consumo tomado de la red.</small></div>
         </div>
 
-        <div class="campo">
-            <label for="cantidad_equipos">Cantidad de equipos eléctricos</label>
-            <input type="number" id="cantidad_equipos" name="cantidad_equipos" step="1" min="0" required>
-        </div>
-
-        <div class="campo">
-            <label for="tipo_inmueble">Tipo de inmueble</label>
-            <select id="tipo_inmueble" name="tipo_inmueble" required>
-                <option value="Casa">Casa</option>
-                <option value="Departamento">Departamento</option>
-            </select>
-        </div>
-
-        <div class="campo">
-            <label for="horas_alto_consumo">Horas de alto consumo por día</label>
-            <input type="number" id="horas_alto_consumo" name="horas_alto_consumo" step="1" min="0" max="24" required>
-        </div>
-
-        <label class="checkbox">
-            <input type="checkbox" id="uso_horario_pico" name="uso_horario_pico">
-            Uso frecuente en horario pico
-        </label>
-
-        <label class="checkbox">
-            <input type="checkbox" id="panel_solar" name="panel_solar">
-            Tengo panel solar
-        </label>
-
+        <p class="tarifa-nota">Tarifa de referencia usada para el cálculo: <b>$0,75 por kWh</b>.</p>
         <p class="error" id="errorMsg"></p>
 
-        <button type="submit">Calcular</button>
+        <div class="acciones">
+            <button type="button" class="btn-ghost" id="btnVolverInicio">← Volver</button>
+            <button type="submit" class="btn-primary" id="btnCalcular">Analizar mi consumo</button>
+        </div>
     </form>
 </main>
 
-<main class="Resultado" id="vista-resultado" hidden>
+<!-- ============ RESULTADO ============ -->
+<main class="vista resultado" id="vista-resultado" hidden>
     <h2>Resultado de tu análisis</h2>
-    <div class="Tarjeta">
-        <p class="etiqueta">Categoría</p>
-        <p class="valor" id="resCategoria">-</p>
-        <p class="subvalor" id="resProbabilidad"></p>
+
+    <!-- Resumen: categoría + confianza -->
+    <section class="tarjeta resumen">
+        <div class="badge-wrap">
+            <span class="pre-badge">Tu perfil energético es</span>
+            <div class="badge" id="resBadge">—</div>
+            <p class="cat-desc" id="resDescCat"></p>
+            <p class="confianza" id="resConfianzaTxt"></p>
+        </div>
+        <div class="gauge-wrap">
+            <canvas id="chartConfianza" width="120" height="120"></canvas>
+        </div>
+    </section>
+
+    <!-- Indicadores -->
+    <section class="indicadores">
+        <div class="tarjeta ind">
+            <span class="ind-label">Lo que consumes</span>
+            <span class="ind-valor" id="indReal">—</span>
+            <span class="ind-unidad">kWh cada mes</span>
+        </div>
+        <div class="tarjeta ind">
+            <span class="ind-label">Lo esperado para tu hogar</span>
+            <span class="ind-valor" id="indEsperado">—</span>
+            <span class="ind-unidad">kWh cada mes</span>
+        </div>
+        <div class="tarjeta ind">
+            <span class="ind-label">Diferencia</span>
+            <span class="ind-valor" id="indDesviacion">—</span>
+            <span class="ind-unidad" id="indDesvTexto">vs. lo esperado</span>
+        </div>
+    </section>
+    <p class="explica" id="resExplica"></p>
+
+    <!-- Costo + gráfico consumo -->
+    <section class="dos-columnas">
+        <div class="tarjeta">
+            <h3>Cuánto pagas</h3>
+            <p class="costo-mes-linea">Alrededor de <b class="costo-mes" id="resCosto">—</b> al mes</p>
+            <p class="costo-calc">Así se calcula: <b id="calcKwh">—</b> kWh × <b>$0,75</b> por kWh</p>
+            <p class="costo-anual">En un año son ≈ <b id="resCostoAnual">—</b></p>
+        </div>
+        <div class="tarjeta">
+            <h3>Tu consumo vs el esperado</h3>
+            <canvas id="chartConsumo"></canvas>
+        </div>
+    </section>
+
+    <!-- Recomendaciones -->
+    <section class="tarjeta">
+        <h3>Recomendaciones para ti</h3>
+        <ul id="resRecomendaciones" class="recs"></ul>
+    </section>
+
+    <!-- Simulador de ahorro -->
+    <section class="tarjeta simulador">
+        <h3>💡 Simulador de ahorro</h3>
+        <p class="subtitulo">Marca las acciones que podrías aplicar y mira cuánto ahorrarías (estimado).</p>
+        <div class="sim-grid">
+            <div class="sim-opciones" id="simOpciones"><!-- generado por JS --></div>
+            <div class="sim-resultado">
+                <canvas id="chartSimulador"></canvas>
+                <div class="sim-ahorro">
+                    <p>Pagarías <b id="simNuevoCosto">—</b> al mes</p>
+                    <p class="ahorro">Ahorrarías <b id="simAhorroMes">—</b> al mes</p>
+                    <p class="ahorro-anual">(<b id="simAhorroAnual">—</b> al año)</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="acciones centrado">
+        <button class="btn-ghost" id="btnVolver">← Nuevo análisis</button>
     </div>
-    <div class="Tarjeta">
-        <p class="etiqueta">Costo estimado mensual</p>
-        <p class="valor" id="resCosto">-</p>
-    </div>
-    <div class="Tarjeta">
-        <p class="etiqueta">Recomendaciones</p>
-        <ul id="resRecomendaciones"></ul>
-    </div>
-    <button id="btnVolver">Volver al formulario</button>
 </main>
 
-<footer></footer>
+<footer class="footer">
+    <span>EnergiAI · Equipo G9-LATAM-69 · Hackathon ONE</span>
+</footer>
 
-<script src="JS/main.js" defer></script>
+<script src="JS/main.js"></script>
 </body>
 </html>
