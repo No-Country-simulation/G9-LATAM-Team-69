@@ -16,7 +16,7 @@ public class WebConfig implements WebMvcConfigurer {
             "http://127.0.0.1:5500",
             "http://localhost:3000",
             "http://localhost:5173",
-            "https://TU-PROYECTO.vercel.app") // <-- reemplaza por tu URL real de Vercel
+            "https://129.151.116.82.nip.io") // dominio de producción (misma VM)
         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
         .allowedHeaders("*");
   }

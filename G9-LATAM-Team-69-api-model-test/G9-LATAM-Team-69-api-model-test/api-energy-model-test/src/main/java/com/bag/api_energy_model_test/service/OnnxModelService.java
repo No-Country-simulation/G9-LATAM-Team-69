@@ -45,6 +45,12 @@ public class OnnxModelService {
   private OrtSession session;
   private String inputName;
 
+  private final RecomendacionEngine recomendacionEngine;
+
+  public OnnxModelService(RecomendacionEngine recomendacionEngine) {
+    this.recomendacionEngine = recomendacionEngine;
+  }
+
   @PostConstruct
   public void init() {
     try {
@@ -70,7 +76,7 @@ public class OnnxModelService {
     String categoria = executeModel(features);        // etiqueta desde el clasificador ONNX
     double probabilidad = calcularConfianza(request);  // confianza calibrada (0.5 .. ~1.0)
 
-    List<String> recomendaciones = generarRecomendaciones(request, categoria);
+    List<String> recomendaciones = recomendacionEngine.generar(request, categoria);
     double costoEstimado = redondear(request.getConsumoKwh() * TARIFA_KWH);
 
     return PredictionResponse.builder()
@@ -156,33 +162,6 @@ public class OnnxModelService {
     } catch (OrtException e) {
       throw new RuntimeException("Error al ejecutar el modelo ONNX", e);
     }
-  }
-
-  /** Reglas de recomendación (portadas del notebook de Ciencia de Datos). */
-  private List<String> generarRecomendaciones(PredictionRequest r, String categoria) {
-    List<String> recs = new ArrayList<>();
-    boolean usoPico = Boolean.TRUE.equals(r.getUsoHorarioPico());
-    boolean panelSolar = Boolean.TRUE.equals(r.getPanelSolar());
-
-    if (usoPico) {
-      recs.add("Reducir el uso de equipos durante los horarios pico");
-    }
-    if (r.getHorasAltoConsumo() >= 9) {
-      recs.add("Distribuir las actividades de mayor consumo a lo largo del día");
-    }
-    if (r.getCantidadEquipos() >= 10) {
-      recs.add("Evaluar equipos con alto consumo energético");
-    }
-    if (!panelSolar && !"Eficiente".equals(categoria)) {
-      recs.add("Evaluar la instalación de paneles solares para autoconsumo");
-    }
-    if ("Eficiente".equals(categoria) && recs.isEmpty()) {
-      recs.add("Mantener los hábitos actuales de consumo eficiente");
-    }
-    if (recs.isEmpty()) {
-      recs.add("Monitorear el consumo con un medidor inteligente");
-    }
-    return recs;
   }
 
   private double redondear(double x) {
