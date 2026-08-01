@@ -35,7 +35,15 @@ body {
     position: sticky;
     top: 0;
     z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
+.tema-btn {
+    background: none; border: 1.5px solid var(--gris-cl); border-radius: 50%;
+    width: 42px; height: 42px; cursor: pointer; font-size: 1.15rem; line-height: 1;
+}
+.tema-btn:hover { background: var(--verde-cl); }
 .brand { display: flex; align-items: center; gap: 10px; font-size: 1.5rem; color: var(--azul-osc); }
 .brand img { height: 34px; }
 .brand b { color: var(--verde); }
@@ -177,4 +185,48 @@ h2 { font-size: clamp(1.4rem, 4vw, 2rem); margin-bottom: 6px; }
     .acciones button { width: 100%; }
     .resumen { flex-direction: column; text-align: center; }
     .badge { font-size: 1.3rem; }
+}
+
+/* ---------- Benchmarking ---------- */
+.bench-frase { font-size: 1.1rem; margin-bottom: 14px; }
+.bench-barra { position: relative; height: 14px; border-radius: 8px;
+    background: linear-gradient(90deg, #2E9E5B, #E0A800, #D0473B); }
+.bench-marker { position: absolute; top: -5px; left: 50%; width: 6px; height: 24px;
+    background: var(--azul-osc); border: 2px solid #fff; border-radius: 3px; transform: translateX(-50%);
+    box-shadow: 0 1px 4px rgba(0,0,0,.3); transition: left .5s ease; }
+.bench-extremos { display: flex; justify-content: space-between; color: var(--gris); font-size: .8rem; margin-top: 8px; }
+
+/* ---------- Spinner de carga ---------- */
+.cargando { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 16px; background: rgba(241,251,243,.9); color: var(--azul-osc); }
+.spinner { width: 48px; height: 48px; border: 5px solid var(--gris-cl); border-top-color: var(--verde);
+    border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- Accesibilidad: foco visible ---------- */
+button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible {
+    outline: 3px solid var(--verde); outline-offset: 2px;
+}
+
+/* ---------- Modo oscuro ---------- */
+body[data-theme="dark"] {
+    --azul-osc: #e8f0ea; --gris: #9fb0a6; --gris-cl: #3a4a40;
+    --bg: #0f1a14; --card: #182620; --verde-cl: #20342a;
+}
+body[data-theme="dark"] .explica,
+body[data-theme="dark"] .ind { background: var(--card); }
+body[data-theme="dark"] .campo input,
+body[data-theme="dark"] .campo select { background: #0f1a14; color: #e8f0ea; }
+body[data-theme="dark"] .tarifa-nota,
+body[data-theme="dark"] .sim-op { background: #12201a; }
+body[data-theme="dark"] .cargando { background: rgba(15,26,20,.92); }
+body[data-theme="dark"] .bench-marker { border-color: #182620; }
+
+/* ---------- Impresión / PDF ---------- */
+@media print {
+    .topbar, .footer, .no-print, .simulador, .historial { display: none !important; }
+    body { background: #fff; }
+    .vista { max-width: 100%; padding: 0; }
+    .tarjeta, .ind { box-shadow: none; border: 1px solid #e0e0e0; break-inside: avoid; }
+    h2 { margin-top: 0; }
 }

@@ -1,0 +1,111 @@
+openapi: 3.0.3
+info:
+  title: EnergiAI API
+  description: >
+    API de análisis de eficiencia energética residencial. Recibe datos de una vivienda
+    y devuelve su perfil de eficiencia, la probabilidad, recomendaciones y el costo estimado.
+  version: "1.0.0"
+  contact:
+    name: Equipo G9-LATAM-69
+servers:
+  - url: https://129.151.116.82.nip.io
+    description: Producción (OCI)
+  - url: http://localhost:8080
+    description: Local
+
+paths:
+  /api/v1/onnx/prediction:
+    post:
+      summary: Analiza el consumo de una vivienda
+      description: Clasifica el perfil energético y genera recomendaciones y costo estimado.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PredictionRequest'
+            example:
+              consumo_kwh: 420
+              personas: 3
+              superficie_m2: 80
+              cantidad_equipos: 12
+              tipo_inmueble: Casa
+              uso_horario_pico: true
+              horas_alto_consumo: 10
+              panel_solar: false
+      responses:
+        '200':
+          description: Análisis exitoso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PredictionResponse'
+              example:
+                categoria: Ineficiente
+                probabilidad: 0.89
+                recomendaciones:
+                  - Reducir el uso de equipos durante los horarios pico
+                  - Distribuir las actividades de mayor consumo a lo largo del día
+                costo_estimado_mensual: 315.0
+        '400':
+          description: Faltan campos obligatorios
+
+  /api/v1/health:
+    get:
+      summary: Estado del servicio
+      responses:
+        '200':
+          description: Servicio activo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: UP
+
+components:
+  schemas:
+    PredictionRequest:
+      type: object
+      required: [consumo_kwh, personas, superficie_m2, cantidad_equipos, tipo_inmueble, uso_horario_pico, horas_alto_consumo, panel_solar]
+      properties:
+        consumo_kwh:
+          type: number
+          description: Consumo mensual en kWh
+        personas:
+          type: integer
+          description: Número de habitantes
+        superficie_m2:
+          type: number
+          description: Superficie de la vivienda en m²
+        cantidad_equipos:
+          type: integer
+          description: Cantidad de equipos eléctricos
+        tipo_inmueble:
+          type: string
+          enum: [Casa, Departamento]
+        uso_horario_pico:
+          type: boolean
+          description: Si consume con frecuencia en horario punta
+        horas_alto_consumo:
+          type: integer
+          description: Horas de alto consumo por día
+        panel_solar:
+          type: boolean
+    PredictionResponse:
+      type: object
+      properties:
+        categoria:
+          type: string
+          enum: [Eficiente, Moderado, Ineficiente]
+        probabilidad:
+          type: number
+          description: Confianza de la clasificación (0.5 a 1.0)
+        recomendaciones:
+          type: array
+          items:
+            type: string
+        costo_estimado_mensual:
+          type: number

@@ -15,6 +15,9 @@ const ACCIONES = [
     { id: "solar", label: "Instalar paneles solares (autoconsumo)", factor: 0.25 },
 ];
 
+// Percentiles 0..100 del residual sobre el dataset (30.000 viviendas) — para el benchmarking.
+const PCTL = [-123.7,-81.8,-67.3,-54.3,-49.8,-46.5,-44.0,-41.9,-39.8,-38.2,-36.4,-35.0,-33.5,-32.2,-31.0,-29.8,-28.6,-27.3,-26.3,-25.2,-24.2,-23.2,-22.2,-21.3,-20.3,-19.5,-18.6,-17.7,-16.9,-16.1,-15.2,-14.3,-13.4,-12.6,-11.8,-11.0,-10.1,-9.2,-8.4,-7.7,-6.9,-6.2,-5.3,-4.5,-3.6,-2.8,-1.9,-1.1,-0.3,0.4,1.2,2.0,2.8,3.7,4.4,5.2,6.1,6.9,7.7,8.6,9.4,10.2,11.1,11.8,12.6,13.5,14.3,15.1,15.9,16.7,17.6,18.4,19.2,20.0,20.8,21.7,22.6,23.4,24.3,25.2,26.1,27.0,28.0,28.9,29.9,31.0,32.0,33.1,34.2,35.4,36.6,37.8,39.2,40.6,42.1,43.9,46.0,48.1,50.8,54.3,61.7];
+
 // Descripción en lenguaje claro de cada categoría.
 const DESC_CAT = {
     Eficiente: "Consumes menos energía de la esperada para tu vivienda. ¡Bien hecho!",
@@ -89,6 +92,21 @@ document.addEventListener("DOMContentLoaded", () => {
         renderHistorial();
     };
 
+    // Modo oscuro (recordado en el navegador)
+    const btnTema = document.getElementById("btnTema");
+    if (localStorage.getItem("tema_energiai") === "dark") {
+        document.body.dataset.theme = "dark"; btnTema.textContent = "☀️";
+    }
+    btnTema.onclick = () => {
+        const dark = document.body.dataset.theme === "dark";
+        document.body.dataset.theme = dark ? "" : "dark";
+        btnTema.textContent = dark ? "🌙" : "☀️";
+        localStorage.setItem("tema_energiai", dark ? "light" : "dark");
+    };
+
+    // Exportar a PDF (diálogo de impresión → "Guardar como PDF")
+    document.getElementById("btnPDF").onclick = () => window.print();
+
     // Explicación de horario punta
     document.getElementById("infoPicoBtn").onclick = () => {
         const box = document.getElementById("infoPico");
@@ -111,7 +129,9 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         const btn = document.getElementById("btnCalcular");
+        const cargando = document.getElementById("cargando");
         btn.disabled = true; btn.textContent = "Analizando...";
+        cargando.hidden = false;
         try {
             const resp = await fetch(API_URL, {
                 method: "POST",
@@ -127,6 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error(err);
         } finally {
             btn.disabled = false; btn.textContent = "Analizar mi consumo";
+            cargando.hidden = true;
         }
     });
 });
@@ -183,6 +204,7 @@ function renderResultado(data, payload) {
     charts = {};
     renderGaugeConfianza(data.probabilidad, color);
     renderChartConsumo(payload.consumo_kwh, esperado, color);
+    renderBenchmark(payload.consumo_kwh - esperado);
 
     // Simulador
     estadoActual = { consumo: payload.consumo_kwh, costo: data.costo_estimado_mensual, payload };
@@ -242,6 +264,31 @@ function renderHistorial() {
             scales: { y: { title: { display: true, text: "$ / mes" } } }
         }
     });
+}
+
+// ---- Benchmarking: percentil del residual vs el dataset ----
+function percentil(r) {
+    if (r <= PCTL[0]) return 0;
+    if (r >= PCTL[100]) return 100;
+    for (let i = 0; i < 100; i++) {
+        if (r >= PCTL[i] && r <= PCTL[i + 1]) {
+            const d = PCTL[i + 1] - PCTL[i];
+            return i + (d ? (r - PCTL[i]) / d : 0);
+        }
+    }
+    return 50;
+}
+
+function renderBenchmark(residual) {
+    const p = percentil(residual);           // 0..100 (mayor = consume más)
+    const masEficienteQue = Math.round(100 - p);
+    const frase = document.getElementById("benchFrase");
+    if (p <= 50) {
+        frase.innerHTML = `Eres <b>más eficiente que el ${masEficienteQue}%</b> de las viviendas parecidas a la tuya. 👏`;
+    } else {
+        frase.innerHTML = `<b>Consumes más que el ${Math.round(p)}%</b> de las viviendas parecidas a la tuya. Hay margen para mejorar.`;
+    }
+    document.getElementById("benchMarker").style.left = Math.min(98, Math.max(2, p)) + "%";
 }
 
 function renderGaugeConfianza(prob, color) {
