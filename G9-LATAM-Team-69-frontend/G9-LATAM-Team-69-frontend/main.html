@@ -191,6 +191,16 @@
         </div>
     </section>
 
+    <!-- Historial (guardado en el navegador) -->
+    <section class="tarjeta historial">
+        <div class="hist-head">
+            <h3>📈 Tu evolución</h3>
+            <button type="button" class="btn-link" id="btnLimpiarHist">Limpiar historial</button>
+        </div>
+        <p class="subtitulo" id="histVacio" hidden>Este es tu primer análisis. Los próximos quedarán guardados aquí para que compares tu progreso.</p>
+        <canvas id="chartHistorial" height="150"></canvas>
+    </section>
+
     <div class="acciones centrado">
         <button class="btn-ghost" id="btnVolver">← Nuevo análisis</button>
     </div>

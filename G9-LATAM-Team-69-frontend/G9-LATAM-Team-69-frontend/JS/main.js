@@ -1,6 +1,7 @@
 // ===== EnergiAI — lógica del frontend =====
 const API_URL = "/api/v1/onnx/prediction";
 const TARIFA = 0.75; // $/kWh (tarifa de referencia del reto)
+const HIST_KEY = "historial_energiai"; // clave de localStorage para el historial
 
 // Coeficientes del Modelo A (LinearRegression sobre normalizadores) para estimar el consumo
 // esperado en el navegador. Mismo cálculo que la API usa para el residual.
@@ -83,6 +84,10 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("btnComenzar").onclick = () => mostrar(vistaForm);
     document.getElementById("btnVolverInicio").onclick = () => mostrar(vistaInicio);
     document.getElementById("btnVolver").onclick = () => mostrar(vistaForm);
+    document.getElementById("btnLimpiarHist").onclick = () => {
+        localStorage.removeItem(HIST_KEY);
+        renderHistorial();
+    };
 
     // Explicación de horario punta
     document.getElementById("infoPicoBtn").onclick = () => {
@@ -182,6 +187,61 @@ function renderResultado(data, payload) {
     // Simulador
     estadoActual = { consumo: payload.consumo_kwh, costo: data.costo_estimado_mensual, payload };
     construirSimulador(payload);
+
+    // Historial en el navegador (localStorage)
+    guardarHistorial(payload, data);
+    renderHistorial();
+}
+
+// ---- Historial con localStorage ----
+function leerHistorial() {
+    try { return JSON.parse(localStorage.getItem(HIST_KEY) || "[]"); }
+    catch (e) { return []; }
+}
+
+function guardarHistorial(payload, data) {
+    const hist = leerHistorial();
+    hist.push({
+        fecha: new Date().toISOString(),
+        consumo: payload.consumo_kwh,
+        costo: data.costo_estimado_mensual,
+        categoria: data.categoria
+    });
+    localStorage.setItem(HIST_KEY, JSON.stringify(hist.slice(-12))); // conserva los últimos 12
+}
+
+function renderHistorial() {
+    const hist = leerHistorial();
+    const vacio = document.getElementById("histVacio");
+    const canvas = document.getElementById("chartHistorial");
+    if (charts.hist) { charts.hist.destroy(); charts.hist = null; }
+
+    if (hist.length < 2) {
+        vacio.hidden = false;
+        canvas.style.display = "none";
+        return;
+    }
+    vacio.hidden = true;
+    canvas.style.display = "";
+
+    const labels = hist.map(h => new Date(h.fecha).toLocaleDateString("es-CL", { day: "2-digit", month: "2-digit" }));
+    charts.hist = new Chart(canvas, {
+        type: "line",
+        data: {
+            labels,
+            datasets: [{
+                label: "Costo mensual",
+                data: hist.map(h => Math.round(h.costo)),
+                borderColor: "#5AA469",
+                backgroundColor: "rgba(90,164,105,.15)",
+                fill: true, tension: .3, pointRadius: 4, pointBackgroundColor: "#5AA469"
+            }]
+        },
+        options: {
+            responsive: true, plugins: { legend: { display: false } },
+            scales: { y: { title: { display: true, text: "$ / mes" } } }
+        }
+    });
 }
 
 function renderGaugeConfianza(prob, color) {
