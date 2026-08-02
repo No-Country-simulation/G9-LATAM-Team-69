@@ -47,6 +47,11 @@
     <p class="subtitulo">Todos los campos son necesarios para un análisis preciso.</p>
 
     <form id="formAnalisis" class="tarjeta">
+        <div class="campo campo-email">
+            <label for="email">Tu email <span class="opcional">(opcional, para tu historial)</span></label>
+            <input type="email" id="email" name="email" placeholder="tucorreo@ejemplo.com">
+            <small>Con el mismo email verás tu historial y comparación en cualquier dispositivo.</small>
+        </div>
         <div class="grid-campos">
             <div class="campo">
                 <label for="consumo_kwh">Consumo mensual (kWh)</label>
@@ -200,14 +205,12 @@
         </div>
     </section>
 
-    <!-- Historial (guardado en el navegador) -->
-    <section class="tarjeta historial">
-        <div class="hist-head">
-            <h3>📈 Tu evolución</h3>
-            <button type="button" class="btn-link" id="btnLimpiarHist">Limpiar historial</button>
-        </div>
-        <p class="subtitulo" id="histVacio" hidden>Este es tu primer análisis. Los próximos quedarán guardados aquí para que compares tu progreso.</p>
+    <!-- Comparación entre períodos (desde la base de datos, por email) -->
+    <section class="tarjeta historial" id="seccionComparacion">
+        <h3>📈 Comparación entre períodos</h3>
+        <p class="subtitulo" id="compVacio" hidden>Ingresa tu email en el formulario y haz análisis para ver y comparar tu historial aquí — funciona en cualquier dispositivo.</p>
         <canvas id="chartHistorial" height="150"></canvas>
+        <div id="compTabla" class="comp-tabla-wrap"></div>
     </section>
 
     <div class="acciones centrado no-print">
