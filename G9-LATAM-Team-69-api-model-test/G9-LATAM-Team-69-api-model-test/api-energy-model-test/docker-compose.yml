@@ -1,0 +1,11 @@
+services:
+  api:
+    build: .
+    container_name: energia-api
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    # El modelo se descarga desde OCI al arrancar (definido en application.yaml).
+    # Si prefieres pasar la URL por variable de entorno, descomenta:
+    # environment:
+    #   - ONNX_MODEL_PATH=https://objectstorage.../o/Nova-onnxmodel.onnx
