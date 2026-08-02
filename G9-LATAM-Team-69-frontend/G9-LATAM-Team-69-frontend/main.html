@@ -11,9 +11,10 @@
 
 <header class="topbar">
     <div class="brand">
-        <img src="Imagenes/HojaLogo.png" alt="EnergiAI" onerror="this.style.display='none'">
+        <img src="Imagenes/HojaLogo.png" alt="" onerror="this.style.display='none'">
         <span>Energi<b>AI</b></span>
     </div>
+    <button id="btnTema" class="tema-btn" type="button" aria-label="Cambiar entre modo claro y oscuro">🌙</button>
 </header>
 
 <!-- ============ INICIO ============ -->
@@ -108,7 +109,7 @@
         </div>
 
         <p class="tarifa-nota">Tarifa de referencia usada para el cálculo: <b>$0,75 por kWh</b>.</p>
-        <p class="error" id="errorMsg"></p>
+        <p class="error" id="errorMsg" role="alert" aria-live="assertive"></p>
 
         <div class="acciones">
             <button type="button" class="btn-ghost" id="btnVolverInicio">← Volver</button>
@@ -153,6 +154,14 @@
         </div>
     </section>
     <p class="explica" id="resExplica"></p>
+
+    <!-- Benchmarking vs hogares similares -->
+    <section class="tarjeta benchmark">
+        <h3>¿Cómo te comparas con hogares similares?</h3>
+        <p class="bench-frase" id="benchFrase">—</p>
+        <div class="bench-barra"><span class="bench-marker" id="benchMarker"></span></div>
+        <div class="bench-extremos"><span>← Más eficiente</span><span>Menos eficiente →</span></div>
+    </section>
 
     <!-- Costo + gráfico consumo -->
     <section class="dos-columnas">
@@ -201,10 +210,17 @@
         <canvas id="chartHistorial" height="150"></canvas>
     </section>
 
-    <div class="acciones centrado">
+    <div class="acciones centrado no-print">
         <button class="btn-ghost" id="btnVolver">← Nuevo análisis</button>
+        <button class="btn-ghost" id="btnCompartir" type="button">🔗 Copiar enlace</button>
+        <button class="btn-primary" id="btnPDF" type="button">⬇ Descargar informe (PDF)</button>
     </div>
 </main>
+
+<div class="cargando" id="cargando" hidden aria-live="polite" aria-busy="true">
+    <div class="spinner" role="status"></div>
+    <span>Analizando tu consumo…</span>
+</div>
 
 <footer class="footer">
     <span>EnergiAI · Equipo G9-LATAM-69 · Hackathon ONE</span>

@@ -71,6 +71,43 @@ function colorCategoria(cat) {
     return cat === "Eficiente" ? "#2E9E5B" : cat === "Moderado" ? "#E0A800" : "#D0473B";
 }
 
+// Validación semántica: rangos razonables y coherencia entre campos.
+function validarSemantica(p) {
+    const nums = [p.consumo_kwh, p.personas, p.superficie_m2, p.cantidad_equipos, p.horas_alto_consumo];
+    if (nums.some(v => isNaN(v))) return "Completa todos los campos con números válidos.";
+    if (p.personas < 1 || p.personas > 20) return "El número de personas debe estar entre 1 y 20.";
+    if (p.superficie_m2 < 5 || p.superficie_m2 > 2000) return "La superficie debe estar entre 5 y 2000 m².";
+    if (p.consumo_kwh <= 0 || p.consumo_kwh > 5000) return "El consumo mensual debe estar entre 1 y 5000 kWh.";
+    if (p.cantidad_equipos < 0 || p.cantidad_equipos > 100) return "La cantidad de equipos no parece válida (0 a 100).";
+    if (p.horas_alto_consumo < 0 || p.horas_alto_consumo > 24) return "Las horas de alto consumo deben estar entre 0 y 24.";
+    if (p.consumo_kwh / p.superficie_m2 > 30) return "El consumo es muy alto para esa superficie. Revisa los valores de kWh y m².";
+    return null;
+}
+
+// Genera una URL que reproduce este análisis (para compartir).
+function enlaceCompartir(p) {
+    const params = new URLSearchParams({
+        consumo_kwh: p.consumo_kwh, personas: p.personas, superficie_m2: p.superficie_m2,
+        cantidad_equipos: p.cantidad_equipos, tipo_inmueble: p.tipo_inmueble,
+        uso_horario_pico: p.uso_horario_pico ? 1 : 0, horas_alto_consumo: p.horas_alto_consumo,
+        panel_solar: p.panel_solar ? 1 : 0
+    });
+    return location.origin + location.pathname + "?" + params.toString();
+}
+
+// Rellena el formulario desde los parámetros de la URL (para enlaces compartidos).
+function rellenarFormulario(q) {
+    const set = (id, v) => { const el = document.getElementById(id); if (el && v != null) el.value = v; };
+    set("consumo_kwh", q.get("consumo_kwh"));
+    set("personas", q.get("personas"));
+    set("superficie_m2", q.get("superficie_m2"));
+    set("cantidad_equipos", q.get("cantidad_equipos"));
+    set("tipo_inmueble", q.get("tipo_inmueble"));
+    set("horas_alto_consumo", q.get("horas_alto_consumo"));
+    document.getElementById("uso_horario_pico").checked = q.get("uso_horario_pico") === "1";
+    document.getElementById("panel_solar").checked = q.get("panel_solar") === "1";
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     const vistaInicio = document.getElementById("vista-inicio");
     const vistaForm = document.getElementById("vista-formulario");
@@ -107,6 +144,28 @@ document.addEventListener("DOMContentLoaded", () => {
     // Exportar a PDF (diálogo de impresión → "Guardar como PDF")
     document.getElementById("btnPDF").onclick = () => window.print();
 
+    // Compartir por enlace (copia una URL que reproduce este análisis)
+    document.getElementById("btnCompartir").onclick = async () => {
+        if (!estadoActual) return;
+        const url = enlaceCompartir(estadoActual.payload);
+        const b = document.getElementById("btnCompartir");
+        const orig = b.textContent;
+        try {
+            await navigator.clipboard.writeText(url);
+            b.textContent = "¡Enlace copiado!";
+            setTimeout(() => (b.textContent = orig), 2000);
+        } catch (e) {
+            prompt("Copia este enlace:", url);
+        }
+    };
+
+    // Si la URL trae parámetros de un análisis compartido, autollenar y analizar
+    const q = new URLSearchParams(location.search);
+    if (q.has("consumo_kwh")) {
+        rellenarFormulario(q);
+        form.requestSubmit();
+    }
+
     // Explicación de horario punta
     document.getElementById("infoPicoBtn").onclick = () => {
         const box = document.getElementById("infoPico");
@@ -127,6 +186,9 @@ document.addEventListener("DOMContentLoaded", () => {
             horas_alto_consumo: parseInt(d.get("horas_alto_consumo"), 10),
             panel_solar: d.get("panel_solar") === "on",
         };
+
+        const errSem = validarSemantica(payload);
+        if (errSem) { errorMsg.textContent = errSem; return; }
 
         const btn = document.getElementById("btnCalcular");
         const cargando = document.getElementById("cargando");
