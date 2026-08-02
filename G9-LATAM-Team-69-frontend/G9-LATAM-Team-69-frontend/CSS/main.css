@@ -170,11 +170,14 @@ h2 { font-size: clamp(1.4rem, 4vw, 2rem); margin-bottom: 6px; }
 .sim-ahorro .ahorro-anual { color: var(--ok); font-size: .95rem; margin-top: 2px; }
 .sim-ahorro b { font-size: 1.15em; }
 
-/* ---------- Historial ---------- */
-.hist-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
-.hist-head h3 { margin: 0; }
-.btn-link { background: none; border: none; color: var(--gris); cursor: pointer; font-size: .85rem; text-decoration: underline; }
-.btn-link:hover { color: var(--bad); }
+/* ---------- Comparación entre períodos ---------- */
+.opcional { color: var(--gris); font-weight: normal; font-size: .85rem; }
+.comp-tabla-wrap { overflow-x: auto; margin-top: 16px; }
+.comp-tabla { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.comp-tabla th, .comp-tabla td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--gris-cl); }
+.comp-tabla th { color: var(--gris); font-weight: 600; }
+.var-up { color: var(--bad); font-weight: 600; }
+.var-down { color: var(--ok); font-weight: 600; }
 
 /* ---------- Footer ---------- */
 .footer { background: var(--verde); color: #eafaf0; text-align: center; padding: 16px; font-size: .9rem; margin-top: 30px; }
