@@ -32,11 +32,18 @@ public class OnnxModelService {
   private static final double A_EQUIPOS = -0.193;
   private static final double A_TIPO_DEPTO = 0.383;
   private static final double A_INTERCEPTO = 148.099;
-  // Umbrales del residual (percentiles 40 y 75 del entrenamiento)
-  private static final double UMBRAL_EFICIENTE = -6.91;
-  private static final double UMBRAL_MODERADO = 21.74;
-  // Escala de la curva de confianza (kWh): mayor = confianza crece más despacio con la distancia
-  private static final double ESCALA_CONFIANZA = 30.0;
+  // Distribución empírica del residual: percentiles 0..100 sobre 30.000 viviendas del dataset.
+  // Enfoque cuantílico (homoscedástico) para ubicar el residual de forma calibrada por los datos.
+  private static final double[] PCTL_RESIDUAL = {
+    -123.7,-81.8,-67.3,-54.3,-49.8,-46.5,-44.0,-41.9,-39.8,-38.2,-36.4,-35.0,-33.5,-32.2,-31.0,
+    -29.8,-28.6,-27.3,-26.3,-25.2,-24.2,-23.2,-22.2,-21.3,-20.3,-19.5,-18.6,-17.7,-16.9,-16.1,
+    -15.2,-14.3,-13.4,-12.6,-11.8,-11.0,-10.1,-9.2,-8.4,-7.7,-6.9,-6.2,-5.3,-4.5,-3.6,-2.8,-1.9,
+    -1.1,-0.3,0.4,1.2,2.0,2.8,3.7,4.4,5.2,6.1,6.9,7.7,8.6,9.4,10.2,11.1,11.8,12.6,13.5,14.3,15.1,
+    15.9,16.7,17.6,18.4,19.2,20.0,20.8,21.7,22.6,23.4,24.3,25.2,26.1,27.0,28.0,28.9,29.9,31.0,
+    32.0,33.1,34.2,35.4,36.6,37.8,39.2,40.6,42.1,43.9,46.0,48.1,50.8,54.3,61.7
+  };
+  // Escala (en puntos de percentil) para la confianza: mayor distancia a la frontera 40/75 = más confianza.
+  private static final double ESCALA_PCTL = 20.0;
 
   @Value("${onnx.model.path:https://objectstorage.sa-santiago-1.oraclecloud.com/p/Xy_nBCKh7MTQnoVaHK0TQh37BtkYwctssIjIO49vEs8369aN5afxA90QrP7ASHtm/n/axexzonjzvlk/b/pre_bucket_g9/o/}")
   private Resource modelResource;
@@ -98,14 +105,28 @@ public class OnnxModelService {
   }
 
   /**
-   * Probabilidad = confianza según cuán lejos está el residual de la frontera entre categorías.
-   * Justo en el umbral -> 0.5 (caso ambiguo); cuanto más claro el caso, más se acerca a 1.0.
+   * Probabilidad = confianza basada en el PERCENTIL del residual dentro de la distribución
+   * empírica (30.000 viviendas) — enfoque cuantílico. Cerca de la frontera 40/75 -> ~0.5;
+   * lejos -> ~1.0. Reemplaza el parche por distancia en kWh con un valor calibrado por los datos.
    */
   private double calcularConfianza(PredictionRequest r) {
     double residual = r.getConsumoKwh() - consumoEsperado(r);
-    double dist = Math.min(Math.abs(residual - UMBRAL_EFICIENTE),
-                           Math.abs(residual - UMBRAL_MODERADO));
-    return 0.5 + 0.5 * (1.0 - Math.exp(-dist / ESCALA_CONFIANZA));
+    double p = percentilResidual(residual);                       // 0..100
+    double distFrontera = Math.min(Math.abs(p - 40), Math.abs(p - 75));
+    return 0.5 + 0.5 * Math.min(1.0, distFrontera / ESCALA_PCTL);
+  }
+
+  /** Percentil (0..100) del residual en la distribución empírica, por interpolación lineal. */
+  private double percentilResidual(double residual) {
+    if (residual <= PCTL_RESIDUAL[0]) return 0;
+    if (residual >= PCTL_RESIDUAL[100]) return 100;
+    for (int i = 0; i < 100; i++) {
+      if (residual >= PCTL_RESIDUAL[i] && residual <= PCTL_RESIDUAL[i + 1]) {
+        double d = PCTL_RESIDUAL[i + 1] - PCTL_RESIDUAL[i];
+        return i + (d != 0 ? (residual - PCTL_RESIDUAL[i]) / d : 0);
+      }
+    }
+    return 50;
   }
 
   /** Valida que lleguen los 8 campos del contrato; si falta alguno responde 400. */
