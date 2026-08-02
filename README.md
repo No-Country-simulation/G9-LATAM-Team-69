@@ -10,7 +10,7 @@ Todo expuesto por una **API REST** y desplegado en **Oracle Cloud Infrastructure
 ## Demo en vivo
 
 - **Aplicación:** https://129.151.116.82.nip.io/
-- **API (Swagger):** https://129.151.116.82.nip.io/swagger.html
+- **API (Swagger interactivo):** https://129.151.116.82.nip.io/swagger-ui.html
 - **Endpoint:** `POST https://129.151.116.82.nip.io/api/v1/onnx/prediction`
 
 ## Arquitectura
@@ -46,8 +46,8 @@ Compute**), que carga el **modelo ONNX** desde **OCI Object Storage** al arranca
 - Diseño responsive + modo oscuro
 - Simulador de ahorro interactivo
 - Benchmarking: comparación con hogares similares (percentil)
-- Historial de evolución del consumo
-- Exportar informe a PDF
+- Comparación entre períodos: historial persistente por email (Oracle DB), multi-dispositivo
+- Exportar informe a PDF · compartir análisis por enlace
 - Accesibilidad (foco por teclado, aria-live, textos claros)
 
 ## Stack tecnológico
@@ -56,8 +56,9 @@ Compute**), que carga el **modelo ONNX** desde **OCI Object Storage** al arranca
 |---|---|
 | Ciencia de Datos | Python, Pandas, scikit-learn, skl2onnx |
 | Modelo | ONNX (ejecutado con ONNX Runtime en Java) |
-| Backend | Java 21, Spring Boot, ONNX Runtime |
+| Backend | Java 21, Spring Boot, ONNX Runtime, JPA |
 | Frontend | HTML + CSS + JavaScript (Chart.js) |
+| Base de datos | OCI Autonomous Database (Oracle) |
 | Infraestructura | OCI Object Storage, OCI Compute, Caddy (HTTPS) |
 
 ## Ciencia de Datos (resumen)
@@ -93,7 +94,8 @@ Detalle completo en [`docs/CIENCIA_DE_DATOS.md`](docs/CIENCIA_DE_DATOS.md) y en 
   "costo_estimado_mensual": 315.0 }
 ```
 
-Documentación interactiva en `/swagger.html`. Contrato completo en [`docs/API.md`](docs/API.md).
+Documentación interactiva (Swagger UI dinámico) en `/swagger-ui.html`. Contrato completo en
+[`docs/API.md`](docs/API.md).
 
 ## Cómo correrlo localmente
 

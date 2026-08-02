@@ -2,6 +2,23 @@
 
 Cambios realizados sobre el código base para cumplir el contrato del reto y desplegar en la nube.
 
+## Mejoras avanzadas (persistencia, cuantílica y docs)
+
+- **Base de datos (OCI Autonomous):** `model/Analisis.java`, `repository/AnalisisRepository.java`,
+  `controller/AnalisisController.java` (nuevos) + dependencias JPA/Oracle en `pom.xml` y datasource
+  en `application.yaml`. Endpoints `POST/GET /api/v1/analisis` para guardar y listar por email.
+- **Frontend — comparación entre períodos:** campo de email, guardado del análisis en la BD y
+  sección con gráfico + tabla de variación entre períodos (multi-dispositivo). Reemplaza el
+  historial en `localStorage`.
+- **Probabilidad cuantílica en la API:** `OnnxModelService` ahora calcula la confianza a partir del
+  percentil del residual en la distribución empírica (30.000 viviendas), reemplazando la constante
+  fija anterior.
+- **Swagger dinámico:** dependencia `springdoc-openapi-starter-webmvc-ui`; doc interactiva en
+  `/swagger-ui.html`. Se eliminó el Swagger estático (`swagger.html`, `openapi.yaml`).
+- **Validación semántica** de entradas y **compartir análisis por enlace** en el frontend.
+- **Dockerfile** + `docker-compose.yml` + `.dockerignore` para la API.
+- Notebook: secciones de **explicabilidad** (7b) y **regresión cuantílica** (7c).
+
 ## Fase 1 de mejoras (post-MVP)
 
 - **`service/RecomendacionEngine.java` (nuevo)** — motor de recomendaciones extraído a su propia

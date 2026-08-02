@@ -75,6 +75,28 @@ GET /api/v1/health   →   {"status": "UP"}
 
 Endpoint de salud para monitoreo (y para pings anti-inactividad que eviten que OCI reclame la VM).
 
+## Persistencia de análisis (comparación entre períodos)
+
+Guardan y consultan el historial por email, en **OCI Autonomous Database**.
+
+**`POST /api/v1/analisis`** — guarda un análisis:
+```json
+{ "email": "tucorreo@ejemplo.com", "consumo_kwh": 420, "costo_estimado_mensual": 315,
+  "categoria": "Ineficiente", "probabilidad": 0.89 }
+```
+Devuelve el objeto guardado con `id` y `fecha` (asignados por el servidor).
+
+**`GET /api/v1/analisis?email=tucorreo@ejemplo.com`** — devuelve el historial del usuario en orden
+cronológico, para comparar el consumo y el costo entre períodos.
+
+> Identificación simple por email, sin autenticación. Adecuado para el MVP; un login real sería el
+> siguiente nivel.
+
+## Documentación interactiva
+
+Swagger UI dinámico (autogenerado con springdoc) en **`/swagger-ui.html`**, y el contrato OpenAPI
+en `/v3/api-docs`.
+
 ## Manejo de errores
 
 | Código | Cuándo | Respuesta |
@@ -86,9 +108,9 @@ Endpoint de salud para monitoreo (y para pings anti-inactividad que eviten que O
 ## Notas de implementación
 
 - La **categoría** proviene del clasificador ONNX (salida `label`).
-- La **probabilidad** se calcula como una *confianza calibrada por distancia del residual a la
-  frontera entre categorías* (ver `CIENCIA_DE_DATOS.md`), no como el `predict_proba` crudo del
-  clasificador. Esto la hace informativa incluso cuando el clasificador está muy seguro.
+- La **probabilidad** se calcula como una *confianza calibrada por el percentil del residual*
+  dentro de la distribución empírica de 30.000 viviendas (enfoque cuantílico), no como el
+  `predict_proba` crudo del clasificador. Se fundamenta en los datos, no en una constante fija.
 - Las **recomendaciones** las genera `RecomendacionEngine` con reglas explicables sobre las
   variables de hábito. Un perfil **Eficiente** recibe solo refuerzo positivo (sin correctivas);
   la instalación de paneles solares se plantea únicamente para el perfil **Ineficiente** sin panel
