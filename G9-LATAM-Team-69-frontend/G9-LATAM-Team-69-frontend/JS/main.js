@@ -1,7 +1,8 @@
 // ===== EnergiAI — lógica del frontend =====
 const API_URL = "/api/v1/onnx/prediction";
 const TARIFA = 0.75; // $/kWh (tarifa de referencia del reto)
-const HIST_KEY = "historial_energiai"; // clave de localStorage para el historial
+const API_ANALISIS = "/api/v1/analisis";
+const EMAIL_KEY = "email_energiai"; // recuerda el email del usuario en el navegador
 
 // Coeficientes del Modelo A (LinearRegression sobre normalizadores) para estimar el consumo
 // esperado en el navegador. Mismo cálculo que la API usa para el residual.
@@ -108,6 +109,20 @@ function rellenarFormulario(q) {
     document.getElementById("panel_solar").checked = q.get("panel_solar") === "1";
 }
 
+// Construye un payload de análisis desde los parámetros de la URL.
+function payloadDesdeQuery(q) {
+    return {
+        consumo_kwh: parseFloat(q.get("consumo_kwh")),
+        personas: parseInt(q.get("personas"), 10),
+        superficie_m2: parseFloat(q.get("superficie_m2")),
+        cantidad_equipos: parseInt(q.get("cantidad_equipos"), 10),
+        tipo_inmueble: q.get("tipo_inmueble"),
+        uso_horario_pico: q.get("uso_horario_pico") === "1",
+        horas_alto_consumo: parseInt(q.get("horas_alto_consumo"), 10),
+        panel_solar: q.get("panel_solar") === "1",
+    };
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     const vistaInicio = document.getElementById("vista-inicio");
     const vistaForm = document.getElementById("vista-formulario");
@@ -124,10 +139,9 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("btnComenzar").onclick = () => mostrar(vistaForm);
     document.getElementById("btnVolverInicio").onclick = () => mostrar(vistaInicio);
     document.getElementById("btnVolver").onclick = () => mostrar(vistaForm);
-    document.getElementById("btnLimpiarHist").onclick = () => {
-        localStorage.removeItem(HIST_KEY);
-        renderHistorial();
-    };
+    // Prefill del email guardado en el navegador
+    const emailGuardado = localStorage.getItem(EMAIL_KEY);
+    if (emailGuardado) document.getElementById("email").value = emailGuardado;
 
     // Modo oscuro (recordado en el navegador)
     const btnTema = document.getElementById("btnTema");
@@ -163,7 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const q = new URLSearchParams(location.search);
     if (q.has("consumo_kwh")) {
         rellenarFormulario(q);
-        form.requestSubmit();
+        ejecutarAnalisis(payloadDesdeQuery(q), false); // enlace compartido: solo ver, no guardar
     }
 
     // Explicación de horario punta
@@ -172,23 +186,11 @@ document.addEventListener("DOMContentLoaded", () => {
         box.hidden = !box.hidden;
     };
 
-    form.addEventListener("submit", async (e) => {
-        e.preventDefault();
+    // Ejecuta un análisis. guardar=false para enlaces compartidos (solo ver, no registrar).
+    async function ejecutarAnalisis(payload, guardar = true) {
         errorMsg.textContent = "";
-        const d = new FormData(form);
-        const payload = {
-            consumo_kwh: parseFloat(d.get("consumo_kwh")),
-            personas: parseInt(d.get("personas"), 10),
-            superficie_m2: parseFloat(d.get("superficie_m2")),
-            cantidad_equipos: parseInt(d.get("cantidad_equipos"), 10),
-            tipo_inmueble: d.get("tipo_inmueble"),
-            uso_horario_pico: d.get("uso_horario_pico") === "on",
-            horas_alto_consumo: parseInt(d.get("horas_alto_consumo"), 10),
-            panel_solar: d.get("panel_solar") === "on",
-        };
-
         const errSem = validarSemantica(payload);
-        if (errSem) { errorMsg.textContent = errSem; return; }
+        if (errSem) { mostrar(vistaForm); errorMsg.textContent = errSem; return; }
 
         const btn = document.getElementById("btnCalcular");
         const cargando = document.getElementById("cargando");
@@ -204,13 +206,31 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = await resp.json();
             renderResultado(data, payload);
             mostrar(vistaRes);
+            if (guardar) guardarYComparar(payload, data);
+            else document.getElementById("seccionComparacion").hidden = true; // enlace: sin historial
         } catch (err) {
+            mostrar(vistaForm);
             errorMsg.textContent = "No se pudo conectar con la API. " + err.message;
             console.error(err);
         } finally {
             btn.disabled = false; btn.textContent = "Analizar mi consumo";
             cargando.hidden = true;
         }
+    }
+
+    form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const d = new FormData(form);
+        ejecutarAnalisis({
+            consumo_kwh: parseFloat(d.get("consumo_kwh")),
+            personas: parseInt(d.get("personas"), 10),
+            superficie_m2: parseFloat(d.get("superficie_m2")),
+            cantidad_equipos: parseInt(d.get("cantidad_equipos"), 10),
+            tipo_inmueble: d.get("tipo_inmueble"),
+            uso_horario_pico: d.get("uso_horario_pico") === "on",
+            horas_alto_consumo: parseInt(d.get("horas_alto_consumo"), 10),
+            panel_solar: d.get("panel_solar") === "on",
+        });
     });
 });
 
@@ -272,52 +292,62 @@ function renderResultado(data, payload) {
     estadoActual = { consumo: payload.consumo_kwh, costo: data.costo_estimado_mensual, payload };
     construirSimulador(payload);
 
-    // Historial en el navegador (localStorage)
-    guardarHistorial(payload, data);
-    renderHistorial();
 }
 
-// ---- Historial con localStorage ----
-function leerHistorial() {
-    try { return JSON.parse(localStorage.getItem(HIST_KEY) || "[]"); }
-    catch (e) { return []; }
+// ---- Comparación entre períodos (desde la base de datos, por email) ----
+function parseFecha(s) { return new Date((s || "").slice(0, 19)); }
+
+async function guardarYComparar(payload, data) {
+    document.getElementById("seccionComparacion").hidden = false; // uso normal: mostrar la sección
+    const email = (document.getElementById("email").value || "").trim();
+    if (!email) { renderComparacionVacia(); return; }
+    localStorage.setItem(EMAIL_KEY, email);
+    try {
+        await fetch(API_ANALISIS, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                email,
+                consumo_kwh: payload.consumo_kwh,
+                costo_estimado_mensual: data.costo_estimado_mensual,
+                categoria: data.categoria,
+                probabilidad: data.probabilidad
+            })
+        });
+    } catch (e) { console.error("No se pudo guardar el análisis:", e); }
+    await renderComparacion(email);
 }
 
-function guardarHistorial(payload, data) {
-    const hist = leerHistorial();
-    hist.push({
-        fecha: new Date().toISOString(),
-        consumo: payload.consumo_kwh,
-        costo: data.costo_estimado_mensual,
-        categoria: data.categoria
-    });
-    localStorage.setItem(HIST_KEY, JSON.stringify(hist.slice(-12))); // conserva los últimos 12
-}
-
-function renderHistorial() {
-    const hist = leerHistorial();
-    const vacio = document.getElementById("histVacio");
-    const canvas = document.getElementById("chartHistorial");
+function renderComparacionVacia() {
+    document.getElementById("compVacio").hidden = false;
+    document.getElementById("chartHistorial").style.display = "none";
+    document.getElementById("compTabla").innerHTML = "";
     if (charts.hist) { charts.hist.destroy(); charts.hist = null; }
+}
 
-    if (hist.length < 2) {
-        vacio.hidden = false;
-        canvas.style.display = "none";
-        return;
-    }
-    vacio.hidden = true;
+async function renderComparacion(email) {
+    let lista = [];
+    try {
+        const r = await fetch(API_ANALISIS + "?email=" + encodeURIComponent(email));
+        if (r.ok) lista = await r.json();
+    } catch (e) { console.error("No se pudo leer el historial:", e); }
+
+    if (charts.hist) { charts.hist.destroy(); charts.hist = null; }
+    if (!lista.length) { renderComparacionVacia(); return; }
+
+    document.getElementById("compVacio").hidden = true;
+    const canvas = document.getElementById("chartHistorial");
     canvas.style.display = "";
 
-    const labels = hist.map(h => new Date(h.fecha).toLocaleDateString("es-CL", { day: "2-digit", month: "2-digit" }));
+    const labels = lista.map(a => parseFecha(a.fecha).toLocaleDateString("es-CL", { day: "2-digit", month: "2-digit" }));
     charts.hist = new Chart(canvas, {
         type: "line",
         data: {
             labels,
             datasets: [{
                 label: "Costo mensual",
-                data: hist.map(h => Math.round(h.costo)),
-                borderColor: "#5AA469",
-                backgroundColor: "rgba(90,164,105,.15)",
+                data: lista.map(a => Math.round(a.costo_estimado_mensual)),
+                borderColor: "#5AA469", backgroundColor: "rgba(90,164,105,.15)",
                 fill: true, tension: .3, pointRadius: 4, pointBackgroundColor: "#5AA469"
             }]
         },
@@ -326,6 +356,26 @@ function renderHistorial() {
             scales: { y: { title: { display: true, text: "$ / mes" } } }
         }
     });
+
+    document.getElementById("compTabla").innerHTML = filasTabla(lista);
+}
+
+function filasTabla(lista) {
+    let html = '<table class="comp-tabla"><thead><tr><th>Fecha</th><th>Categoría</th>'
+        + '<th>Consumo</th><th>Costo</th><th>Variación</th></tr></thead><tbody>';
+    lista.forEach((a, i) => {
+        let varTxt = "—";
+        if (i > 0) {
+            const prev = lista[i - 1].consumo_kwh;
+            const d = prev ? ((a.consumo_kwh - prev) / prev) * 100 : 0;
+            const cls = d > 0 ? "var-up" : "var-down";
+            varTxt = `<span class="${cls}">${d > 0 ? "+" : ""}${Math.round(d)}%</span>`;
+        }
+        html += `<tr><td>${parseFecha(a.fecha).toLocaleDateString("es-CL")}</td>`
+            + `<td>${a.categoria}</td><td>${Math.round(a.consumo_kwh)} kWh</td>`
+            + `<td>${money(a.costo_estimado_mensual)}</td><td>${varTxt}</td></tr>`;
+    });
+    return html + "</tbody></table>";
 }
 
 // ---- Benchmarking: percentil del residual vs el dataset ----
