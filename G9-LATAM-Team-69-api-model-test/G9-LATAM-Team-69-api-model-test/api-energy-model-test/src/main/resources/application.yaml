@@ -1,6 +1,16 @@
 spring:
   application:
     name: pre_Auth_bucket_g9
+  datasource:
+    # Reemplaza NOMBRE_SERVICIO por una entrada de tnsnames.ora (ej. energiadb_tp).
+    # TNS_ADMIN debe apuntar a la carpeta del wallet descomprimido en la VM.
+    url: jdbc:oracle:thin:@NOMBRE_SERVICIO?TNS_ADMIN=/home/ubuntu/wallet
+    username: ADMIN
+    # Contraseña del ADMIN de la BD. NO subir a un repo público (usa variable de entorno en prod).
+    password: REEMPLAZA_PASSWORD_ADMIN
+  jpa:
+    hibernate:
+      ddl-auto: update   # crea/actualiza la tabla ANALISIS automáticamente
 onnx:
   model:
     # Modelo alojado en OCI Object Storage (Pre-Authenticated Request, solo lectura).
